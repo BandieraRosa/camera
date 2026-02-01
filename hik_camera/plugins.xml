@@ -1,0 +1,5 @@
+<library path="hik_camera_driver">
+  <class type="HikCamera::HikCameraDriver" base_class_type="Camera::CameraBase">
+    <description>HIK industrial camera driver</description>
+  </class>
+</library>
