@@ -1,0 +1,22 @@
+/**:
+  ros__parameters:
+    # 相机类型选择: "hik_camera" 或 "huaray_camera"
+    camera_type: "hik_camera"
+
+    # 通用参数
+    exposure_time: 1000.0 # 曝光时间 (us)
+    gain: 16.0 # 增益
+    autocap: true # 自动采集模式 (false为外部触发模式)
+    frame_rate: 249.0 # 帧率
+    frame_id: "camera_optical_frame"
+    camera_name: "narrow_stereo"
+
+    # rotation_code: 0=180度, 1=90度顺时针, 2=90度逆时针
+    rotate_image: true
+    rotation_code: 1
+
+    # interface_type: 0=All, 1=GigE, 2=USB3，for huaray_camera
+    interface_type: 0
+
+    # 相机标定信息URL
+    camera_info_url: "package://camera_node/config/camera_info.yaml"
