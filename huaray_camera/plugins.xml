@@ -1,0 +1,5 @@
+<library path="huaray_camera_driver">
+  <class type="HuarayCamera::HuarayCameraDriver" base_class_type="Camera::CameraBase">
+    <description>Huaray industrial camera driver</description>
+  </class>
+</library>
