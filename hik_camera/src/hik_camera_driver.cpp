@@ -7,14 +7,11 @@
 namespace HikCamera
 {
 
-HikCameraDriver::HikCameraDriver(rclcpp::Node* node) : Camera::CameraBase()
-{
-  node_ = node;
-}
+HikCamera::HikCamera(rclcpp::Node* node) : Camera::CameraBase(node) {}
 
-HikCameraDriver::~HikCameraDriver() { Stop(); }
+HikCamera::~HikCamera() { Stop(); }
 
-bool HikCameraDriver::Initialize()
+bool HikCamera::Initialize()
 {
   unsigned int ret{};
   MV_CC_DEVICE_INFO_LIST device_list{};
@@ -159,7 +156,7 @@ bool HikCameraDriver::Initialize()
   return true;
 }
 
-void HikCameraDriver::Stop()
+void HikCamera::Stop()
 {
   state_.store(Camera::CameraState::STOPPED);
 
@@ -196,7 +193,7 @@ void HikCameraDriver::Stop()
   Log("Hik camera stopped and handle destroyed.", LOG_INFO);
 }
 
-bool HikCameraDriver::Read(cv::Mat& img, rclcpp::Time& timestamp_ns)
+bool HikCamera::Read(cv::Mat& img, rclcpp::Time& timestamp_ns)
 {
   if (state_.load() == Camera::CameraState::STOPPED)
   {
@@ -272,23 +269,17 @@ bool HikCameraDriver::Read(cv::Mat& img, rclcpp::Time& timestamp_ns)
   return true;
 }
 
-Camera::CameraState HikCameraDriver::GetState() const { return state_.load(); }
+Camera::CameraState HikCamera::GetState() const { return state_.load(); }
 
-void HikCameraDriver::SetParams(const Camera::CameraParams& params) { params_ = params; }
+void HikCamera::SetParams(const Camera::CameraParams& params) { params_ = params; }
 
-const Camera::CameraParams& HikCameraDriver::GetParams() const { return params_; }
+const Camera::CameraParams& HikCamera::GetParams() const { return params_; }
 
-int HikCameraDriver::GetImageWidth() const
-{
-  return static_cast<int>(img_info_.nWidthMax);
-}
+int HikCamera::GetImageWidth() const { return static_cast<int>(img_info_.nWidthMax); }
 
-int HikCameraDriver::GetImageHeight() const
-{
-  return static_cast<int>(img_info_.nHeightMax);
-}
+int HikCamera::GetImageHeight() const { return static_cast<int>(img_info_.nHeightMax); }
 
-void HikCameraDriver::SetFloatValue(const std::string& name, double value)
+void HikCamera::SetFloatValue(const std::string& name, double value)
 {
   if (handle_ == nullptr)
   {
@@ -306,7 +297,7 @@ void HikCameraDriver::SetFloatValue(const std::string& name, double value)
   }
 }
 
-void HikCameraDriver::SetEnumValue(const std::string& name, unsigned int value)
+void HikCamera::SetEnumValue(const std::string& name, unsigned int value)
 {
   if (handle_ == nullptr)
   {
@@ -326,4 +317,4 @@ void HikCameraDriver::SetEnumValue(const std::string& name, unsigned int value)
 }  // namespace HikCamera
 
 // 导出插件
-PLUGINLIB_EXPORT_CLASS(HikCamera::HikCameraDriver, Camera::CameraBase)
+PLUGINLIB_EXPORT_CLASS(HikCamera::HikCamera, Camera::CameraBase)

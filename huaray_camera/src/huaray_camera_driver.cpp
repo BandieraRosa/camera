@@ -7,14 +7,11 @@
 namespace HuarayCamera
 {
 
-HuarayCameraDriver::HuarayCameraDriver(rclcpp::Node* node) : Camera::CameraBase()
-{
-  node_ = node;
-}
+HuarayCamera::HuarayCamera(rclcpp::Node* node) : Camera::CameraBase(node) {}
 
-HuarayCameraDriver::~HuarayCameraDriver() { Stop(); }
+HuarayCamera::~HuarayCamera() { Stop(); }
 
-bool HuarayCameraDriver::Initialize()
+bool HuarayCamera::Initialize()
 {
   int ret{};
   IMV_DeviceList device_list{};
@@ -201,7 +198,7 @@ bool HuarayCameraDriver::Initialize()
   return true;
 }
 
-void HuarayCameraDriver::Stop()
+void HuarayCamera::Stop()
 {
   state_.store(Camera::CameraState::STOPPED);
 
@@ -264,7 +261,7 @@ void HuarayCameraDriver::Stop()
   Log("Huaray camera stopped and handle destroyed.", LOG_INFO);
 }
 
-bool HuarayCameraDriver::Read(cv::Mat& img, rclcpp::Time& timestamp_ns)
+bool HuarayCamera::Read(cv::Mat& img, rclcpp::Time& timestamp_ns)
 {
   if (state_.load() == Camera::CameraState::STOPPED || handle_ == nullptr ||
       !is_grabbing_.load())
@@ -352,20 +349,17 @@ bool HuarayCameraDriver::Read(cv::Mat& img, rclcpp::Time& timestamp_ns)
   return true;
 }
 
-Camera::CameraState HuarayCameraDriver::GetState() const { return state_.load(); }
+Camera::CameraState HuarayCamera::GetState() const { return state_.load(); }
 
-void HuarayCameraDriver::SetParams(const Camera::CameraParams& params)
-{
-  params_ = params;
-}
+void HuarayCamera::SetParams(const Camera::CameraParams& params) { params_ = params; }
 
-const Camera::CameraParams& HuarayCameraDriver::GetParams() const { return params_; }
+const Camera::CameraParams& HuarayCamera::GetParams() const { return params_; }
 
-int HuarayCameraDriver::GetImageWidth() const { return image_width_; }
+int HuarayCamera::GetImageWidth() const { return image_width_; }
 
-int HuarayCameraDriver::GetImageHeight() const { return image_height_; }
+int HuarayCamera::GetImageHeight() const { return image_height_; }
 
-void HuarayCameraDriver::SetFloatValue(const std::string& name, double value)
+void HuarayCamera::SetFloatValue(const std::string& name, double value)
 {
   if (handle_ == nullptr || !is_opened_.load())
   {
@@ -382,7 +376,7 @@ void HuarayCameraDriver::SetFloatValue(const std::string& name, double value)
   }
 }
 
-void HuarayCameraDriver::SetEnumValue(const std::string& name, unsigned int value)
+void HuarayCamera::SetEnumValue(const std::string& name, unsigned int value)
 {
   if (handle_ == nullptr || !is_opened_.load())
   {
@@ -399,7 +393,7 @@ void HuarayCameraDriver::SetEnumValue(const std::string& name, unsigned int valu
   }
 }
 
-void HuarayCameraDriver::SetEnumSymbol(const std::string& name, const std::string& value)
+void HuarayCamera::SetEnumSymbol(const std::string& name, const std::string& value)
 {
   if (handle_ == nullptr || !is_opened_.load())
   {
@@ -419,4 +413,4 @@ void HuarayCameraDriver::SetEnumSymbol(const std::string& name, const std::strin
 }  // namespace HuarayCamera
 
 // 导出插件
-PLUGINLIB_EXPORT_CLASS(HuarayCamera::HuarayCameraDriver, Camera::CameraBase)
+PLUGINLIB_EXPORT_CLASS(HuarayCamera::HuarayCamera, Camera::CameraBase)

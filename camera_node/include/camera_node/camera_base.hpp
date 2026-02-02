@@ -46,6 +46,7 @@ class CameraBase
   using LogCallback = std::function<void(const std::string&, int)>;  // message, level
 
   CameraBase() = default;
+  CameraBase(rclcpp::Node* node) : node_(node) {}
   virtual ~CameraBase() = default;
 
   // 禁止拷贝

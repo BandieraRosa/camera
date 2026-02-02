@@ -16,11 +16,11 @@ namespace HikCamera
  * 继承自 CameraBase，实现HIK工业相机的具体操作。
  * 作为 pluginlib 插件供 camera_node 加载。
  */
-class HikCameraDriver : public Camera::CameraBase
+class HikCamera : public Camera::CameraBase
 {
  public:
-  HikCameraDriver(rclcpp::Node* node = nullptr);
-  ~HikCameraDriver() override;
+  HikCamera(rclcpp::Node* node = nullptr);
+  ~HikCamera() override;
 
   // === 实现基类接口 ===
   bool Initialize() override;

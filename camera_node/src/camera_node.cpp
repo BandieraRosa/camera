@@ -133,11 +133,11 @@ bool CameraNode::LoadCameraPlugin()
     std::string plugin_name;
     if (camera_type_ == "hik_camera" || camera_type_ == "hik")
     {
-      plugin_name = "HikCamera::HikCameraDriver";
+      plugin_name = "HikCamera::HikCamera";
     }
     else if (camera_type_ == "huaray_camera" || camera_type_ == "huaray")
     {
-      plugin_name = "HuarayCamera::HuarayCameraDriver";
+      plugin_name = "HuarayCamera::HuarayCamera";
     }
     else
     {

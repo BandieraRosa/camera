@@ -16,11 +16,11 @@ namespace HuarayCamera
  * 继承自 CameraBase，实现华睿工业相机的具体操作。
  * 作为 pluginlib 插件供 camera_node 加载。
  */
-class HuarayCameraDriver : public Camera::CameraBase
+class HuarayCamera : public Camera::CameraBase
 {
  public:
-  HuarayCameraDriver(rclcpp::Node* node = nullptr);
-  ~HuarayCameraDriver() override;
+  HuarayCamera(rclcpp::Node* node = nullptr);
+  ~HuarayCamera() override;
 
   // === 实现基类接口 ===
   bool Initialize() override;
