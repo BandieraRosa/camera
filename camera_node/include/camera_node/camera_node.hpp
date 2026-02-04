@@ -46,6 +46,22 @@ class CameraNode : public rclcpp::Node
   bool LoadCameraPlugin();
 
   /**
+   * @brief 根据camera_type匹配插件
+   * @param camera_type 相机类型参数（包名、厂商名或完整类名）
+   * @param available_plugins 可用插件列表
+   * @return 匹配的完整类名，未匹配返回空字符串
+   */
+  std::string FindMatchingPlugin(const std::string& camera_type,
+                                const std::vector<std::string>& available_plugins);
+
+  /**
+   * @brief 格式化插件列表用于错误提示
+   * @param plugins 插件列表
+   * @return 格式化后的字符串
+   */
+  std::string FormatPluginList(const std::vector<std::string>& plugins);
+
+  /**
    * @brief 设置日志回调
    */
   void SetupLogCallback();

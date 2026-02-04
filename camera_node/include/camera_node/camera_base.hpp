@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <condition_variable>
 #include <functional>
 #include <memory>
@@ -113,6 +112,12 @@ class CameraBase
   void SetLogCallback(LogCallback callback) { log_callback_ = std::move(callback); }
 
   /**
+   * @brief 设置 ROS 节点指针
+   * @param node ROS 节点指针
+   */
+  void SetNode(rclcpp::Node* node) { node_ = node; }
+
+  /**
    * @brief 获取状态变化通知的条件变量
    */
   std::condition_variable& GetStateCondition() { return state_cv_; }
@@ -123,7 +128,7 @@ class CameraBase
   std::mutex& GetStateMutex() { return state_mutex_; }
 
   // 日志级别
-  enum LogLevel
+  enum LogLevel : uint8_t
   {
     LOG_DEBUG = 0,
     LOG_INFO = 1,

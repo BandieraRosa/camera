@@ -1,5 +1,7 @@
 #include "camera_node/camera_node.hpp"
 
+#include <algorithm>
+
 using namespace std::chrono_literals;
 
 namespace Camera
@@ -125,24 +127,32 @@ bool CameraNode::LoadCameraPlugin()
 {
   try
   {
-    // 创建插件加载器
     camera_loader_ = std::make_unique<pluginlib::ClassLoader<CameraBase>>(
         "camera_node", "Camera::CameraBase");
 
-    // 根据camera_type参数确定插件名称
-    std::string plugin_name;
-    if (camera_type_ == "hik_camera" || camera_type_ == "hik")
+    auto available_plugins = camera_loader_->getDeclaredClasses();
+
+    RCLCPP_INFO(this->get_logger(), "Available camera plugins:");
+    for (const auto& plugin : available_plugins)
     {
-      plugin_name = "HikCamera::HikCamera";
+      RCLCPP_INFO(this->get_logger(), "  - %s", plugin.c_str());
     }
-    else if (camera_type_ == "huaray_camera" || camera_type_ == "huaray")
+
+    std::string plugin_name = FindMatchingPlugin(camera_type_, available_plugins);
+
+    if (plugin_name.empty())
     {
-      plugin_name = "HuarayCamera::HuarayCamera";
-    }
-    else
-    {
-      // 尝试直接使用camera_type作为插件名称
-      plugin_name = camera_type_;
+      RCLCPP_ERROR(this->get_logger(), "No matching plugin found for camera_type '%s'",
+                   camera_type_.c_str());
+      RCLCPP_ERROR(this->get_logger(), "Available plugins: %s",
+                   FormatPluginList(available_plugins).c_str());
+      RCLCPP_ERROR(this->get_logger(), "Usage: camera_type can be:");
+      RCLCPP_ERROR(this->get_logger(),
+                   "  1. Package name (e.g., 'hik_camera', 'huaray_camera')");
+      RCLCPP_ERROR(this->get_logger(), "  2. Vendor name (e.g., 'hik', 'huaray')");
+      RCLCPP_ERROR(this->get_logger(),
+                   "  3. Full class name (e.g., 'HikCamera::HikCamera')");
+      return false;
     }
 
     RCLCPP_INFO(this->get_logger(), "Loading camera plugin: %s", plugin_name.c_str());
@@ -156,6 +166,8 @@ bool CameraNode::LoadCameraPlugin()
       return false;
     }
 
+    camera_->SetNode(this);
+
     // 设置参数
     camera_->SetParams(params_);
 
@@ -166,6 +178,87 @@ bool CameraNode::LoadCameraPlugin()
     RCLCPP_ERROR(this->get_logger(), "Failed to load camera plugin: %s", ex.what());
     return false;
   }
+}
+
+std::string CameraNode::FindMatchingPlugin(
+    const std::string& camera_type, const std::vector<std::string>& available_plugins)
+{
+  std::string camera_type_lower = camera_type;
+  std::transform(camera_type_lower.begin(), camera_type_lower.end(),
+                 camera_type_lower.begin(), ::tolower);
+
+  for (const auto& plugin : available_plugins)
+  {
+    std::string plugin_lower = plugin;
+    std::transform(plugin_lower.begin(), plugin_lower.end(), plugin_lower.begin(),
+                   ::tolower);
+
+    // 直接匹配完整类名
+    if (plugin_lower == camera_type_lower)
+    {
+      RCLCPP_INFO(this->get_logger(), "Matched by full class name: %s", plugin.c_str());
+      return plugin;
+    }
+
+    // 匹配包名
+    if (camera_type_lower.find("_camera") != std::string::npos)
+    {
+      std::string vendor = camera_type_lower.substr(0, camera_type_lower.find("_camera"));
+      std::string expected_plugin_lower = vendor + "camera::" + vendor + "camera";
+      if (plugin_lower == expected_plugin_lower)
+      {
+        RCLCPP_INFO(this->get_logger(), "Matched by package name: %s", plugin.c_str());
+        return plugin;
+      }
+    }
+
+    // 匹配厂商名
+    if (camera_type_lower.length() < 8)
+    {
+      std::string expected_plugin_lower =
+          camera_type_lower + "camera::" + camera_type_lower + "camera";
+      if (plugin_lower == expected_plugin_lower)
+      {
+        RCLCPP_INFO(this->get_logger(), "Matched by vendor name: %s", plugin.c_str());
+        return plugin;
+      }
+    }
+
+    // 部分匹配
+    if (plugin_lower.find(camera_type_lower) != std::string::npos)
+    {
+      RCLCPP_INFO(this->get_logger(), "Matched by partial match: %s", plugin.c_str());
+      return plugin;
+    }
+  }
+
+  return "";
+}
+
+std::string CameraNode::FormatPluginList(const std::vector<std::string>& plugins)
+{
+  std::string result;
+  for (size_t i = 0; i < plugins.size(); ++i)
+  {
+    if (i > 0)
+    {
+      result += ", ";
+    }
+    result += "'" + plugins[i] + "'";
+
+    // 提取并显示可用的参数名
+    std::string plugin_lower = plugins[i];
+    std::transform(plugin_lower.begin(), plugin_lower.end(), plugin_lower.begin(),
+                   ::tolower);
+
+    size_t pos = plugin_lower.find("camera::");
+    if (pos != std::string::npos)
+    {
+      std::string vendor = plugin_lower.substr(0, pos);
+      result += " (try: '" + vendor + "' or '" + vendor + "_camera')";
+    }
+  }
+  return result;
 }
 
 void CameraNode::SetupLogCallback()
